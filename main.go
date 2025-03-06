@@ -1,16 +1,23 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, Receiptly!")
+func setupRouter() *gin.Engine {
+	router := gin.Default()
+
+	return router
 }
 
 func main() {
-	http.HandleFunc("/", handler)
+	router := setupRouter()
+	router.Run(":8080")
+}
 
-	http.ListenAndServe(":8080", nil)
+func ProcessReceipt(c *gin.Context) {
+	response := map[string]string{"id": "1234567890"}
+	c.JSON(http.StatusOK, response)
 }
