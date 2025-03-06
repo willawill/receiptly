@@ -2,8 +2,10 @@ package main
 
 import (
 	"net/http"
+	"receiptly/domain/entities"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func setupRouter() *gin.Engine {
@@ -17,7 +19,25 @@ func main() {
 	router.Run(":8080")
 }
 
-func ProcessReceipt(c *gin.Context) {
-	response := map[string]string{"id": "1234567890"}
-	c.JSON(http.StatusOK, response)
+type UUIDGenerator interface {
+	New() string
+}
+
+type RealUUIDGenerator struct{}
+
+func (g RealUUIDGenerator) New() string {
+	return uuid.New().String()
+}
+
+func ProcessReceipt(uuidGenerator UUIDGenerator) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var newReceipt entities.Receipt
+		if err := c.ShouldBindJSON(&newReceipt); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		newReceipt.ID = uuidGenerator.New()
+		c.JSON(http.StatusOK, newReceipt)
+	}
 }
