@@ -41,3 +41,24 @@ func ProcessReceipt(uuidGenerator UUIDGenerator) gin.HandlerFunc {
 		c.JSON(http.StatusOK, newReceipt)
 	}
 }
+
+type RealUUIDGenerator struct{}
+
+func (g RealUUIDGenerator) New() string {
+	return uuid.New().String()
+}
+
+func ProcessReceipt(uuidGenerator UUIDGenerator) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var newReceipt entities.Receipt
+		if err := c.ShouldBindJSON(&newReceipt); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		newReceipt.ID = uuidGenerator.New()
+		c.JSON(http.StatusOK, newReceipt)
+	}
+}
+
+
